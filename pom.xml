@@ -7,8 +7,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>aut.ac.nz</groupId>
-    <artifactId>comp713-Individual-Project</artifactId>
+    <groupId>nz.ac.aut.comp713</groupId>
+    <artifactId>Individual_Project</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>war</packaging>
@@ -18,5 +18,48 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>11.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.7.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <finalName>Individual_Project</finalName>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+
+            </plugin>
+
+        </plugins>
+
+    </build>
 
 </project>
