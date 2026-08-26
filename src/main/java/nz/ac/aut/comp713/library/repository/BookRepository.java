@@ -45,4 +45,55 @@ public class BookRepository {
 
         return books;
     }
+
+    public Book findById(Long id) {
+        String sql = """
+            SELECT id, title, author, isbn, available
+            FROM books
+            WHERE id = ?
+            """;
+
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return new Book(
+                        result.getLong("id"),
+                        result.getString("title"),
+                        result.getString("author"),
+                        result.getString("isbn"),
+                        result.getBoolean("available")
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not find book", e);
+        }
+
+        return null;
+    }
+
+    public void setAvailability(Long bookId, boolean available) {
+        String sql = """
+            UPDATE books
+            SET available = ?
+            WHERE id = ?
+            """;
+
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setBoolean(1, available);
+            statement.setLong(2, bookId);
+
+            statement.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not update book availability", e);
+        }
+    }
 }
