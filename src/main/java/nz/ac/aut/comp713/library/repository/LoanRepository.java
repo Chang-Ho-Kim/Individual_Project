@@ -20,30 +20,49 @@ public class LoanRepository {
     @Resource(lookup = "jdbc/LibraryDB")
     private DataSource dataSource;
 
+
+    // ==========================================
+    // Find all loans
+    // ==========================================
+
     public List<Loan> findAll() {
+
         List<Loan> loans = new ArrayList<>();
 
         String sql = """
             SELECT id, member_id, book_id, borrowed_at, returned_at
             FROM loans
+            ORDER BY borrowed_at DESC
             """;
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet result = statement.executeQuery()) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
+             ResultSet result =
+                     statement.executeQuery()) {
 
             while (result.next()) {
                 loans.add(mapLoan(result));
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not retrieve loans", e);
+
+            throw new RuntimeException(
+                "Could not retrieve loans",
+                e
+            );
         }
 
         return loans;
     }
 
+
+    // ==========================================
+    // Check whether a book is currently borrowed
+    // ==========================================
+
     public boolean hasActiveLoan(Long bookId) {
+
         String sql = """
             SELECT COUNT(*)
             FROM loans
@@ -52,39 +71,66 @@ public class LoanRepository {
             """;
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setLong(1, bookId);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (ResultSet result =
+                     statement.executeQuery()) {
+
                 result.next();
+
                 return result.getInt(1) > 0;
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not check book loan", e);
+
+            throw new RuntimeException(
+                "Could not check book loan",
+                e
+            );
         }
     }
 
-    public Loan create(Long memberId, Long bookId) {
+
+    // ==========================================
+    // Create loan
+    // ==========================================
+
+    public Loan create(
+            Long memberId,
+            Long bookId) {
+
         String sql = """
-            INSERT INTO loans (member_id, book_id, borrowed_at)
+            INSERT INTO loans (
+                member_id,
+                book_id,
+                borrowed_at
+            )
             VALUES (?, ?, CURRENT_TIMESTAMP)
             """;
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                 sql,
-                 java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection =
+                 dataSource.getConnection();
+             PreparedStatement statement =
+                 connection.prepareStatement(
+                     sql,
+                     java.sql.Statement.RETURN_GENERATED_KEYS
+                 )) {
 
             statement.setLong(1, memberId);
             statement.setLong(2, bookId);
 
             statement.executeUpdate();
 
-            try (ResultSet keys = statement.getGeneratedKeys()) {
+            try (ResultSet keys =
+                     statement.getGeneratedKeys()) {
+
                 if (keys.next()) {
-                    Long id = keys.getLong(1);
+
+                    Long id =
+                        keys.getLong(1);
 
                     return new Loan(
                         id,
@@ -97,13 +143,25 @@ public class LoanRepository {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not create loan", e);
+
+            throw new RuntimeException(
+                "Could not create loan",
+                e
+            );
         }
 
-        throw new RuntimeException("Could not create loan");
+        throw new RuntimeException(
+            "Could not create loan"
+        );
     }
 
+
+    // ==========================================
+    // Find active loan
+    // ==========================================
+
     public Loan findActiveLoan(Long loanId) {
+
         String sql = """
             SELECT id, member_id, book_id, borrowed_at, returned_at
             FROM loans
@@ -111,83 +169,138 @@ public class LoanRepository {
             AND returned_at IS NULL
             """;
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection =
+                 dataSource.getConnection();
+             PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
 
             statement.setLong(1, loanId);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (ResultSet result =
+                     statement.executeQuery()) {
+
                 if (result.next()) {
                     return mapLoan(result);
                 }
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not find loan", e);
+
+            throw new RuntimeException(
+                "Could not find loan",
+                e
+            );
         }
 
         return null;
     }
 
+
+    // ==========================================
+    // Return loan
+    // ==========================================
+
     public void returnLoan(Long loanId) {
+
         String sql = """
             UPDATE loans
             SET returned_at = CURRENT_TIMESTAMP
             WHERE id = ?
+            AND returned_at IS NULL
             """;
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection =
+                 dataSource.getConnection();
+             PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
 
             statement.setLong(1, loanId);
+
             statement.executeUpdate();
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not return loan", e);
+
+            throw new RuntimeException(
+                "Could not return loan",
+                e
+            );
         }
     }
 
-    private Loan mapLoan(ResultSet result) throws Exception {
-        Timestamp borrowed = result.getTimestamp("borrowed_at");
-        Timestamp returned = result.getTimestamp("returned_at");
 
-        return new Loan(
-            result.getLong("id"),
-            result.getLong("member_id"),
-            result.getLong("book_id"),
-            borrowed != null ? borrowed.toLocalDateTime() : null,
-            returned != null ? returned.toLocalDateTime() : null
-        );
-    }
+    // ==========================================
+    // Find currently active loans for a member
+    // ==========================================
 
     public List<Loan> findByMemberId(Long memberId) {
 
-        List<Loan> loans = new ArrayList<>();
+        List<Loan> loans =
+            new ArrayList<>();
 
         String sql = """
             SELECT id, member_id, book_id, borrowed_at, returned_at
             FROM loans
             WHERE member_id = ?
+            AND returned_at IS NULL
             ORDER BY borrowed_at DESC
             """;
 
-        try (Connection connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection =
+                 dataSource.getConnection();
+             PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
 
             statement.setLong(1, memberId);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (ResultSet result =
+                     statement.executeQuery()) {
 
                 while (result.next()) {
-                    loans.add(mapLoan(result));
+
+                    loans.add(
+                        mapLoan(result)
+                    );
                 }
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not retrieve member loans", e);
+
+            throw new RuntimeException(
+                "Could not retrieve member loans",
+                e
+            );
         }
 
         return loans;
     }
 
+
+    // ==========================================
+    // Map database row to Loan
+    // ==========================================
+
+    private Loan mapLoan(
+            ResultSet result) throws Exception {
+
+        Timestamp borrowed =
+            result.getTimestamp("borrowed_at");
+
+        Timestamp returned =
+            result.getTimestamp("returned_at");
+
+        return new Loan(
+            result.getLong("id"),
+            result.getLong("member_id"),
+            result.getLong("book_id"),
+
+            borrowed != null
+                ? borrowed.toLocalDateTime()
+                : null,
+
+            returned != null
+                ? returned.toLocalDateTime()
+                : null
+        );
+    }
 }
+

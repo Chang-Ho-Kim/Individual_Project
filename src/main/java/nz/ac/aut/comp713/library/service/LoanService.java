@@ -33,46 +33,78 @@ public class LoanService {
         Member member = memberRepository.findById(memberId);
 
         if (member == null) {
-            throw new IllegalArgumentException("Member does not exist");
+            throw new IllegalArgumentException(
+                    "Member does not exist"
+            );
         }
 
         Book book = bookRepository.findById(bookId);
 
         if (book == null) {
-            throw new IllegalArgumentException("Book does not exist");
+            throw new IllegalArgumentException(
+                    "Book does not exist"
+            );
         }
 
         if (!book.isAvailable()) {
-            throw new IllegalArgumentException("Book is not available");
+            throw new IllegalArgumentException(
+                    "Book is not available"
+            );
         }
 
         if (loanRepository.hasActiveLoan(bookId)) {
-            throw new IllegalArgumentException("Book is already borrowed");
+            throw new IllegalArgumentException(
+                    "Book is already borrowed"
+            );
         }
 
-        Loan loan = loanRepository.create(memberId, bookId);
-        bookRepository.setAvailability(bookId, false);
+        Loan loan = loanRepository.create(
+                memberId,
+                bookId
+        );
+
+        bookRepository.setAvailability(
+                bookId,
+                false
+        );
+
         return loan;
     }
 
-    public void returnBook(Long loanId) {
+    public void returnBook(Long loanId, Long memberId) {
 
-        Loan loan = loanRepository.findActiveLoan(loanId);
+        Loan loan =
+                loanRepository.findActiveLoan(loanId);
 
         if (loan == null) {
-            throw new IllegalArgumentException("Active loan does not exist");
+            throw new IllegalArgumentException(
+                    "Active loan does not exist"
+            );
+        }
+
+        if (!loan.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException(
+                    "You can only return your own loans"
+            );
         }
 
         loanRepository.returnLoan(loanId);
-        bookRepository.setAvailability(loan.getBookId(), true);
+
+        bookRepository.setAvailability(
+                loan.getBookId(),
+                true
+        );
     }
 
     public List<Loan> getLoansForMember(Long memberId) {
 
-        Member member = memberRepository.findById(memberId);
+        Member member =
+                memberRepository.findById(memberId);
 
         if (member == null) {
-            throw new IllegalArgumentException("Member does not exist");
+            throw new IllegalArgumentException(
+                    "Member does not exist"
+            );
         }
 
         return loanRepository.findByMemberId(memberId);
