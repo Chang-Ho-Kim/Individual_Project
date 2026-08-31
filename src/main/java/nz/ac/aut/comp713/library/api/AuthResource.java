@@ -23,31 +23,43 @@ public class AuthResource {
     @Path("/login")
     public Response login(LoginRequest request) {
 
-        AuthUser user = authService.authenticate(
-                request.getEmail(),
-                request.getPassword()
-        );
+        try {
 
-        if (user == null) {
+            AuthUser user = authService.authenticate(
+                    request.getEmail(),
+                    request.getPassword()
+            );
+
+            if (user == null) {
+
+                return Response
+                        .status(Response.Status.UNAUTHORIZED)
+                        .entity("Invalid email or password")
+                        .build();
+            }
+
+            String token = authService.createToken(
+                    user.getId()
+            );
+
+            LoginResponse response = new LoginResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    token
+            );
+
             return Response
-                    .status(Response.Status.UNAUTHORIZED)
-                    .entity("Invalid email or password")
+                    .ok(response)
+                    .build();
+
+        } catch (RuntimeException e) {
+
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Database is currently unavailable")
                     .build();
         }
-
-        String token = authService.createToken(
-                user.getId()
-        );
-
-        LoginResponse response = new LoginResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                token
-        );
-
-        return Response
-                .ok(response)
-                .build();
     }
 }
+

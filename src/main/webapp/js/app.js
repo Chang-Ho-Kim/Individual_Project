@@ -2,6 +2,13 @@ const API_BASE = "/Individual_Project/api/v1";
 
 
 // ==========================================
+// Book data
+// ==========================================
+
+let allBooks = [];
+
+
+// ==========================================
 // Authentication
 // ==========================================
 
@@ -270,6 +277,9 @@ async function loadBooks() {
         const books =
             await response.json();
 
+        // Store all books for searching
+        allBooks = books;
+
         count.textContent =
             `${books.length} books`;
 
@@ -301,6 +311,73 @@ async function loadBooks() {
 
         console.error(error);
     }
+}
+
+
+// ==========================================
+// Search books
+// ==========================================
+
+function searchBooks() {
+
+    const searchInput =
+        document.getElementById("bookSearch");
+
+    const grid =
+        document.getElementById("booksGrid");
+
+    const searchTerm =
+        searchInput.value.toLowerCase();
+
+    const filteredBooks =
+        allBooks.filter(book => {
+
+            const title =
+                (book.title || "").toLowerCase();
+
+            const author =
+                (book.author || "").toLowerCase();
+
+            return (
+                title.includes(searchTerm) ||
+                author.includes(searchTerm)
+            );
+        });
+
+    grid.innerHTML = "";
+
+    if (filteredBooks.length === 0) {
+
+        grid.innerHTML =
+            `<div class="empty-state">
+                No books found.
+             </div>`;
+
+        return;
+    }
+
+    filteredBooks.forEach(book => {
+
+        grid.appendChild(
+            createBookCard(book)
+        );
+    });
+}
+
+
+// ==========================================
+// Book search event
+// ==========================================
+
+const bookSearch =
+    document.getElementById("bookSearch");
+
+if (bookSearch) {
+
+    bookSearch.addEventListener(
+        "input",
+        searchBooks
+    );
 }
 
 
@@ -586,8 +663,6 @@ function createLoanCard(
 
     return card;
 }
-
-
 
 
 // ==========================================
