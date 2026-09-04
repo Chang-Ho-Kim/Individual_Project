@@ -1,0 +1,11 @@
+Payara Configuration
+
+1. JDBC connection pool name-> LibraryPool.
+2. Datasource class -> com.mysql.cj.jdbc.MysqlDataSource
+3. Maximum pool size -> 5.
+4. Database additional properties -> Lecturer provided details.
+5. sslMode -> REQUIRED 
+6. fallback properties in screenshot in canvas course materials
+7. JDBC Resource -> JNDI Name: jdbc/LibraryDB
+   			     Pool Name: LibraryPool
+8. Deploy Individual_Project.war.
