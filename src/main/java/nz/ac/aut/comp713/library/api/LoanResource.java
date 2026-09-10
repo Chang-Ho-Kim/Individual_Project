@@ -1,6 +1,7 @@
 package nz.ac.aut.comp713.library.api;
 
 import nz.ac.aut.comp713.library.domain.Loan;
+import nz.ac.aut.comp713.library.dto.LoanRequest;
 import nz.ac.aut.comp713.library.security.AuthHelper;
 import nz.ac.aut.comp713.library.service.LoanService;
 
@@ -79,6 +80,13 @@ public class LoanResource {
 
             return Response
                     .status(Response.Status.UNAUTHORIZED)
+                    .entity(e.getMessage())
+                    .build();
+
+        } catch (LoanService.ForbiddenException e) {
+
+            return Response
+                    .status(Response.Status.FORBIDDEN)
                     .entity(e.getMessage())
                     .build();
 

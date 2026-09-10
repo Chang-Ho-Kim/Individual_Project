@@ -1,4 +1,4 @@
-package nz.ac.aut.comp713.library.api;
+package nz.ac.aut.comp713.library.dto;
 
 public class LoginResponse {
 

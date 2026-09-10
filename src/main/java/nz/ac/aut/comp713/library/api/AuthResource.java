@@ -8,6 +8,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import nz.ac.aut.comp713.library.dto.LoginRequest;
+import nz.ac.aut.comp713.library.dto.LoginResponse;
 import nz.ac.aut.comp713.library.repository.AuthUser;
 import nz.ac.aut.comp713.library.service.AuthService;
 
