@@ -83,7 +83,7 @@ public class LoanService {
         }
 
         if (!loan.getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException(
+            throw new ForbiddenException(
                     "You can only return your own loans"
             );
         }
@@ -108,5 +108,12 @@ public class LoanService {
         }
 
         return loanRepository.findByMemberId(memberId);
+    }
+
+    public static class ForbiddenException extends RuntimeException {
+
+        public ForbiddenException(String message) {
+            super(message);
+        }
     }
 }
